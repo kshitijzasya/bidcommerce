@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                      String                    @id @default(uuid())
+  email                   String                    @unique() @db.VarChar(62)
+  password                String?
+  name                    String?                   @db.VarChar(50)
+  createdDate             DateTime?                 @default(now())
+  modified_date           DateTime?                 @default(now())
+  @@map("users")
+}
+
+model PasswordReset {
+  id            Int      @id @default(autoincrement())
+  email      String   @unique
+  token         String?
+  created_date  DateTime @default(now())
+  modified_date DateTime @default(now())
+
+  @@map("password_reset")
+}
