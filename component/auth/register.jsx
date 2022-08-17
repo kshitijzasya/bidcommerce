@@ -1,26 +1,27 @@
-import { Col, Form, Input, message, Row } from "antd";
+
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
-import { HeadersComponent } from "../../helpers/HeadersComponent";
-import { openNotificationBox } from "../../helpers/notification";
-import { LoadingSpinner } from "../Loader/LoadingSpinner";
-import AuthWrapper from "./AuthWrapper";
-import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 
 function RegisterPage() {
   const router = useRouter();
-  const [registerForm] = Form.useForm();
-
+  const [inputs, setInputs] = useState({});
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(values) {
+  const handleChange = (event) => {
+    const name = event.target.name;
+    const value = event.target.value;
+    setInputs(values => ({...values, [name]: value}))
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+console.log('submit', inputs);
+    // console.log(values, 'values');
     setLoading(true);
-    values["role"] = 2;
-    values["status"] = 1;
     await fetch("/api/user", {
       method: "POST",
-      body: JSON.stringify(values),
+      body: JSON.stringify(inputs),
       // headers: {
       //   "Content-Type": "application/json",
       // },
@@ -28,176 +29,143 @@ function RegisterPage() {
       .then((response) => response.json())
       .then((data) => {
         if (data.status === 200) {
-          openNotificationBox("success", data.message, 3);
-          registerForm.resetFields();
           // setRegisterToggle(false);
           router.push("/auth/login");
         } else {
-          openNotificationBox("error", data.message, 3);
+          console.log('error on register');
         }
         setLoading(false);
       })
       .catch((err) => console.log(err));
   }
 
-  const FormComponent = () => {
     return (
-      <Form
-        form={registerForm}
-        layout="vertical"
-        autoComplete="off"
-        onFinish={handleSubmit}
-        className="login-form"
-      >
-        <Form.Item
-          className="mb-5"
-          name="first_name"
-          label="Name"
-          rules={[
-            {
-              required: true,
-              message: "Please enter your full name!",
-            },
-          ]}
-        >
-          <Input
-            type="text"
-            className="form-control block w-full px-4 py-2 text-xl font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white  focus:outline-none"
-            placeholder=" Name"
-          />
-        </Form.Item>
-
-        {/* <div className="mb-5">
-      <Form.Item name="last_name" label="Last Name">
-        <Input
-          type="text"
-          className="form-control block w-full px-4 py-2 text-xl font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white  focus:outline-none"
-          placeholder="Last Name"
-        />
-      </Form.Item>
-    </div> */}
-        <div className="mb-5">
-          <Form.Item
-            name="company_name"
-            label="Company Name"
-            rules={[
-              {
-                required: true,
-                message: "Please enter your company name!",
-              },
-            ]}
-          >
-            <Input
+      <div className="container flex items-center justify-between">
+      <div className="w-full py-8 md:mb-0 px-8 flex flex-col justify-center md:px-20  ">
+      <div className="contain py-16">
+    <div className="max-w-lg mx-auto shadow px-6 py-7 rounded overflow-hidden">
+      <h2 className="text-2xl uppercase font-medium mb-1">Create an account</h2>
+      <p className="text-gray-600 mb-6 text-sm">Register for new cosutumer</p>
+      <form onSubmit={handleSubmit}>
+        <div className="space-y-2">
+          <div>
+            <label htmlFor="name" className="text-gray-600 mb-2 block">
+              Full Name
+            </label>
+            <input
+              value={inputs.name || ""} 
+              onChange={handleChange}
               type="text"
-              className="form-control block w-full px-4 py-2 text-xl font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white  focus:outline-none"
-              placeholder="Company Name"
+              name="name"
+              id="name"
+              className="block w-full border border-gray-300 px-4 py-3 text-gray-600 text-sm rounded focus:ring-0 focus:border-primary placeholder-gray-400"
+              placeholder="fulan fulana"
             />
-          </Form.Item>
-        </div>
-        <div className="mb-5">
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              {
-                required: true,
-                message: "Please enter your email!",
-              },
-            ]}
-          >
-            <Input
-              type="text"
-              className="form-control block w-full px-4 py-2 text-xl font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:outline-none"
-              placeholder="Email address"
+          </div>
+          <div>
+            <label htmlFor="email" className="text-gray-600 mb-2 block">
+              Email address
+            </label>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              value={inputs.email || ""} 
+              onChange={handleChange}
+              className="block w-full border border-gray-300 px-4 py-3 text-gray-600 text-sm rounded focus:ring-0 focus:border-primary placeholder-gray-400"
+              placeholder="youremail.@domain.com"
             />
-          </Form.Item>
-        </div>
-        <div className="mb-5">
-          <Form.Item
-            name="password"
-            label="Password"
-            rules={[
-              {
-                required: true,
-                message: "Please enter your password!",
-              },
-            ]}
-          >
-            <Input
+          </div>
+          <div>
+            <label htmlFor="password" className="text-gray-600 mb-2 block">
+              Password
+            </label>
+            <input
               type="password"
-              className="form-control block w-full px-4 py-2 text-xl font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white  focus:outline-none"
-              placeholder="Password"
+              name="password"
+              id="password"
+              value={inputs.password || ""} 
+              onChange={handleChange}
+              className="block w-full border border-gray-300 px-4 py-3 text-gray-600 text-sm rounded focus:ring-0 focus:border-primary placeholder-gray-400"
+              placeholder="*******"
             />
-          </Form.Item>
-        </div>
-        <div className="mb-5">
-          <Form.Item
-            name="confirm_password"
-            label="Confirm Password"
-            rules={[
-              {
-                required: true,
-                message: "Please enter confirm your password!",
-              },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("password") === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(
-                    new Error(
-                      "The  password that you have entered did not match!"
-                    )
-                  );
-                },
-              }),
-            ]}
-          >
-            <Input.Password
-              // type="password"
-              className="flex form-control w-full px-4 py-2 text-xl font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white  focus:outline-none"
-              placeholder="Confirm Password"
-              iconRender={(visible) =>
-                visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-              }
+          </div>
+          <div>
+            <label htmlFor="confirm" className="text-gray-600 mb-2 block">
+              Confirm password
+            </label>
+            <input
+              type="password"
+              name="confirm"
+              id="confirm"
+              className="block w-full border border-gray-300 px-4 py-3 text-gray-600 text-sm rounded focus:ring-0 focus:border-primary placeholder-gray-400"
+              placeholder="*******"
             />
-          </Form.Item>
+          </div>
         </div>
-
-        <div className=" md:block justify-between text-center lg:text-left mb-2">
+        <div className="mt-6">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              name="aggrement"
+              id="aggrement"
+              className="text-primary focus:ring-0 rounded-sm cursor-pointer"
+            />
+            <label
+              htmlFor="aggrement"
+              className="text-gray-600 ml-3 cursor-pointer"
+            >
+              I have read and agree to the{" "}
+              <a href="#" className="text-primary">
+                terms &amp; conditions
+              </a>
+            </label>
+          </div>
+        </div>
+        <div className="mt-4">
           <button
             type="submit"
-            className="inline-block px-7 py-5  text-white font-medium text-lg leading-snug  rounded shadow-md  hover:shadow-lg  focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg transition duration-150 ease-in-out w-full btn-blue h-16"
+            className="w-full py-2 text-center text-white bg-blue-800 rounded uppercase font-roboto font-medium text-sm hover:bg-blue-700"
           >
-            Register
+            create account
           </button>
         </div>
-
-        <div className=" md:flex justify-end text-center lg:text-left">
-          <p className="text-sm font-semibold mt-2 pt-1 mb-0">
-            <Link href="/auth/login">
-              <span className="primary-color-blue  font-semibold transition duration-200 ease-in-out cursor-pointer">
-                Back to Login
-              </span>
-            </Link>
-          </p>
+      </form>
+      {/* login with */}
+      <div className="mt-6 flex justify-center relative">
+        <div className="text-gray-600 uppercase px-3 bg-white z-10 relative">
+          Or signup with
         </div>
-      </Form>
+        <div className="absolute left-0 top-3 w-full border-b-2 border-gray-200" />
+      </div>
+      <div className="mt-4 flex gap-4">
+        <a
+          href="#"
+          className="w-1/2 py-2 text-center text-white bg-blue-800 rounded uppercase font-roboto font-medium text-sm hover:bg-blue-700"
+        >
+          facebook
+        </a>
+        <a
+          href="#"
+          className="w-1/2 py-2 text-center text-white bg-red-600 rounded uppercase font-roboto font-medium text-sm hover:bg-red-500"
+        >
+          google
+        </a>
+      </div>
+      {/* ./login with */}
+      <p className="mt-4 text-center text-gray-600">
+        Already have account?{" "}
+        <Link href="/auth/login">
+            <span className="primary-color-blue  font-semibold transition duration-200 ease-in-out cursor-pointer underline">
+            Login now
+            </span>
+          </Link>
+      </p>
+    </div>
+  </div>
+  </div>
+  </div>
     );
-  };
-  return (
-    <>
-      <HeadersComponent />
-      {loading ? (
-        <LoadingSpinner />
-      ) : (
-        <AuthWrapper
-          FormComponent={FormComponent}
-          heading={"Register New account"}
-        />
-      )}
-    </>
-  );
 }
 
 export default RegisterPage;

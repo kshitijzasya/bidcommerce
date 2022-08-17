@@ -1,22 +1,23 @@
-import { useEffect } from "react";
+import React from "react";
 import { getSession } from "next-auth/react";
-import Router from "next/router";
+import Home from "./home";
 
-export default function Home({ user }) {
-  useEffect(() => {
-    if (user?.id) Router.push("/dashboard");
-    else {
-      Router.push("/auth/login");
-    }
-  });
+function Dashboard({ user, session }) {
+  // const { user } = session;
+  return (
+      <Home user={user} />
+  );
 }
+
+export default Dashboard;
+
 export async function getServerSideProps(context) {
   const session = await getSession({ req: context.req });
 
   if (!session) {
     return {
       redirect: {
-        destination: "/auth/login",
+        destination: "/",
         permanent: false,
       },
     };

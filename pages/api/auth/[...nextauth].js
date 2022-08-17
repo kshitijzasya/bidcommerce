@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import NextAuth from "next-auth";
-import Providers from "next-auth/providers";
+import CredentialProvider from "next-auth/providers/credentials";
 import { compareHashedPassword } from "../../../lib/auth";
 
 export default NextAuth({
@@ -10,7 +10,7 @@ export default NextAuth({
     updateAge: 30 * 24 * 60 * 60,
   },
   providers: [
-    Providers.Credentials({
+    CredentialProvider({
       async authorize(credentials) {
         const prismaClient = new PrismaClient();
 
@@ -22,14 +22,6 @@ export default NextAuth({
 
         if (!user) {
           throw new Error("Email not Found.");
-        }
-
-        if (user) {
-          if (user.status === 0) {
-            throw new Error(
-              "You need to reset your password. Link has been sent to your mail."
-            );
-          }
         }
 
         const isValid = await compareHashedPassword(
@@ -51,7 +43,7 @@ export default NextAuth({
     }),
   ],
   callbacks: {
-    jwt: async (token, user, account, profile, isNewUser) => {
+    jwt: async ({token, user, account, profile, isNewUser}) => {
       //  "user" parameter is the object received from "authorize"
       //  "token" is being send below to "session" callback...
       //  ...so we set "user" param of "token" to object from "authorize"...
@@ -60,10 +52,10 @@ export default NextAuth({
 
       return Promise.resolve(token); // ...here
     },
-    session: async (session, user, sessionToken) => {
+    session: async ({session, token}) => {
       //  "session" is current session object
       //  below we set "user" param of "session" to value received from "jwt" callback
-      session.user = user.user;
+      session.user = token.user;
       return Promise.resolve(session);
     },
   },
